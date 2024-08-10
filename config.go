@@ -37,6 +37,7 @@ func configInit() {
 			"toggle_below":       "C-\\",
 		}
 		defaultConfig = map[string]interface{}{
+			"osc52":                         false,
 			"hide_below":                    false,
 			"transparent":                   false,
 			"theme":                         "gruvbox",
@@ -44,8 +45,6 @@ func configInit() {
 			"destination.border_color":      "blue",
 			"source.language.apertium":      "English",
 			"destination.language.apertium": "English",
-			"source.language.argos":         "English",
-			"destination.language.argos":    "English",
 			"source.language.bing":          "English",
 			"destination.language.bing":     "English",
 			"source.language.chatgpt":       "English",
@@ -56,6 +55,8 @@ func configInit() {
 			"destination.language.deeplx":   "English",
 			"source.language.google":        "English",
 			"destination.language.google":   "English",
+			"source.language.libre":         "English",
+			"destination.language.libre":    "English",
 			"source.language.reverso":       "English",
 			"destination.language.reverso":  "English",
 			"translator":                    "Google",
@@ -153,6 +154,7 @@ func configInit() {
 	}
 	translator = translators[config.GetString("translator")]
 	uiStyle.Theme = config.GetString("theme")
+	uiStyle.OSC52 = config.GetBool("osc52")
 	uiStyle.HideBelow = config.GetBool("hide_below")
 	uiStyle.Transparent = config.GetBool("transparent")
 	uiStyle.SetSrcBorderColor(config.GetString("source.border_color")).
@@ -160,7 +162,7 @@ func configInit() {
 	// Import api key and host if file exists
 	if err := serverConfig.ReadInConfig(); err == nil {
 		// api key
-		for _, name := range []string{"ChatGPT", "DeepL", "DeepLX"} {
+		for _, name := range []string{"ChatGPT", "DeepL", "DeepLX", "Libre"} {
 			// Read from value first, then read from file
 			if serverConfig.Get(fmt.Sprintf("api_key.%s.value", name)) != nil {
 				translators[name].SetAPIKey(serverConfig.GetString(fmt.Sprintf("api_key.%s.value", name)))
@@ -172,8 +174,10 @@ func configInit() {
 			}
 		}
 		// host
-		if serverConfig.Get("host.deeplx") != nil {
-			translators["DeepLX"].SetHost(serverConfig.GetString("host.deeplx"))
+		for _, name := range []string{"DeepLX", "Libre"} {
+			if serverConfig.Get(fmt.Sprintf("host.%s", name)) != nil {
+				translators[name].SetHost(serverConfig.GetString(fmt.Sprintf("host.%s", name)))
+			}
 		}
 	}
 	// Set argument language
@@ -211,10 +215,6 @@ func updateConfig() {
 		changed = true
 		config.Set("translator", translator.GetEngineName())
 	}
-	if config.GetBool("hide_below") != uiStyle.HideBelow {
-		changed = true
-		config.Set("hide_below", uiStyle.HideBelow)
-	}
 	if config.GetString("theme") != uiStyle.Theme {
 		changed = true
 		config.Set("theme", uiStyle.Theme)
@@ -222,6 +222,14 @@ func updateConfig() {
 	if config.GetBool("transparent") != uiStyle.Transparent {
 		changed = true
 		config.Set("transparent", uiStyle.Transparent)
+	}
+	if config.GetBool("hide_below") != uiStyle.HideBelow {
+		changed = true
+		config.Set("hide_below", uiStyle.HideBelow)
+	}
+	if config.GetBool("osc52") != uiStyle.OSC52 {
+		changed = true
+		config.Set("osc52", uiStyle.OSC52)
 	}
 	if config.GetString("source.border_color") != uiStyle.SrcBorderStr() {
 		changed = true
