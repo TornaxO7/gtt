@@ -8,11 +8,11 @@
 
 buildGoModule {
   pname = "gtt";
-  version = "8";
+  version = "10";
 
   src = ../.;
 
-  vendorHash = "sha256-5Uwi1apowHoUtvkSgmUV9WbfpVQFTqJ9GA2sRnC5nFw=";
+  vendorHash = "sha256-6C+++HIVwOwOmlsdwXWF/ykyK9WOlq/ktIPjRslvllk=";
 
   nativeBuildInputs = [
     pkg-config
